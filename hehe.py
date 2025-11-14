@@ -11,11 +11,9 @@ CAPTCHA_WAIT_TIMEOUT = 30000  # ms: timeout dài khi phát hiện captcha (3 ph�
 PAGE_RENDER_WAIT = 1000     # ms: nhỏ, đợi sau goto để page có thể bắt đầu load
 
 async def page_has_list_items(page):
-    """Trả về True nếu page đã có các div.content-item.item"""
     return await page.evaluate("() => document.querySelectorAll('div.content-item.item').length > 0")
 
 async def detect_captcha(page):
-    """Những kiểm tra đơn giản để phát hiện captcha trên trang"""
     # tìm iframe chứa recaptcha
     iframe = await page.query_selector("iframe[src*='recaptcha'], iframe[src*='hcaptcha']")
     if iframe:
@@ -53,17 +51,17 @@ async def crawl_alonhadat(max_page=100):
                 # 1) Thử lấy items với timeout ngắn (fast path)
                 try:
                     await page.wait_for_selector("div.content-item.item", timeout=SHORT_TIMEOUT)
-                    print(" -> Item xuất hiện (fast path).")
+                    print("Item xuất hiện.")
                 except PlaywrightTimeoutError:
                     # chưa thấy item trong timeout ngắn: kiểm tra captcha
-                    print(" -> Không tìm thấy item nhanh, kiểm tra captcha...")
+                    print("Không tìm thấy item nhanh, kiểm tra captcha...")
                     is_captcha = await detect_captcha(page)
                     if is_captcha:
-                        print(" --> CAPTCHA nghi ngờ. Chụp màn hình và tăng timeout...")
+                        print("CAPTCHA nghi ngờ. Chụp màn hình và tăng timeout...")
                         # chụp màn hình để debug / gửi cho bạn xem
                         shot_path = f"debug_screenshots/page_{i}_captcha.png"
                         await page.screenshot(path=shot_path, full_page=True)
-                        print(f" --> Screenshot lưu: {shot_path}")
+                        print(f"Screenshot lưu: {shot_path}")
 
                         # chờ lâu hơn để người dùng tự solve hoặc để site trả về nội dung
                         try:
@@ -99,7 +97,7 @@ async def crawl_alonhadat(max_page=100):
                 # lưu screenshot debug
                 try:
                     await page.screenshot(path=f"debug_screenshots/error_page_{i}.png", full_page=True)
-                    print(f" --> Screenshot lỗi lưu: debug_screenshots/error_page_{i}.png")
+                    print(f"Screenshot lỗi lưu: debug_screenshots/error_page_{i}.png")
                 except Exception:
                     pass
                 continue

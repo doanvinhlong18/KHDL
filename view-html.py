@@ -17,7 +17,6 @@ os.makedirs(SCREENSHOT_DIR, exist_ok=True)
 
 
 async def detect_captcha(page):
-    """Kiểm tra nhanh dấu hiệu CAPTCHA trên trang hiện tại."""
     # iframe recaptcha/hcaptcha
     iframe = await page.query_selector("iframe[src*='recaptcha'], iframe[src*='hcaptcha']")
     if iframe:
@@ -40,12 +39,6 @@ async def detect_captcha(page):
 
 
 async def ensure_detail_loaded(page):
-    """
-    Cố gắng đảm bảo nội dung chi tiết đã load:
-    - Thử fast path (SHORT_TIMEOUT).
-    - Nếu không thấy, kiểm tra captcha. Nếu captcha -> chụp màn hình và chờ lâu hơn (CAPTCHA_WAIT_TIMEOUT).
-    - Trả về True nếu đã có nội dung để parse, False nếu bỏ qua.
-    """
     # selector đại diện cho nội dung chi tiết (chọn nhiều selector phòng trường hợp khác nhau)
     main_selectors = "div.moreinfor, .detail.text-content, div.ct_title_box"
     try:
@@ -124,15 +117,6 @@ async def scrape_detail(page, url):
             data["Địa chỉ tài sản"] = addr.strip() if addr else ""
         except:
             data["Địa chỉ tài sản"] = ""
-
-    # Mô tả chi tiết
-    # try:
-    #     mo_ta = await page.locator(".detail.text-content").text_content()
-    #     data["Mô tả chi tiết"] = mo_ta.strip() if mo_ta else ""
-    # except:
-    #     data["Mô tả chi tiết"] = ""
-
-    # Các thông tin khác từ bảng (key/value theo cặp td)
     try:
         rows = page.locator(".moreinfor1 table tr")
         count = await rows.count()
